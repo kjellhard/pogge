@@ -26,8 +26,8 @@ void Network::addP2PLink(const std::string& dataRate, uint32_t nodeIdA, uint32_t
     std::string ip = "10.1." + std::to_string(ip_it++) + ".0";
 
     adress.SetBase(ip.c_str(), "255.255.255.0");
-    //interfaces = adress.Assign(devices);
-    interfaces.Add(adress.Assign(devices));
+    interfaces = adress.Assign(devices);
+    //interfaces.Add(adress.Assign(devices));
 }
 
 Ptr<UdpServer> Network::addUdpServer(uint32_t nodeId) 
