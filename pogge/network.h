@@ -12,6 +12,9 @@
 #include "ns3/animation-interface.h"
 #include "ns3/mobility-helper.h"
 
+#include "ns3/traffic-control-helper.h"
+#include "ns3/net-device-container.h"
+
 #include <string>
 
 using namespace ns3;
@@ -35,6 +38,9 @@ public:
   Ipv4AddressHelper adress;
   NetDeviceContainer devices;
   Ipv4InterfaceContainer interfaces;
+  TrafficControlHelper tch;
+  QueueDiscContainer qdiscs;
+
   uint32_t i = 0;
   
   uint16_t port_number = 9;  
@@ -57,4 +63,5 @@ public:
 
   Ptr<Socket> createConnection(uint32_t nodeId, uint32_t destinationAdressId);
 
+  void addQueues();
 };

@@ -25,14 +25,8 @@ void Network::addP2PLink(const std::string& dataRate, uint32_t nodeIdA, uint32_t
     std::string ip = "10.1." + std::to_string(ip_it++) + ".0";
 
     adress.SetBase(ip.c_str(), "255.255.255.0");
-    //interfaces = adress.Assign(devices);
-    //std::cout<<"stjärt \n";
     interfaces.Add(adress.Assign({devices.Get(i*2), devices.Get(i*2+1)}));
-/*    for(uint32_t i = 0; i < devices.GetN(); i++){
-        //std::cout<<"devices"<<devices.Get(i)->GetAddress()<<'\n';
-        interfaces.Add(adress.Assign(devices.Get(i)));
-    }
-  */  
+ 
  i++;
 }
 
@@ -67,4 +61,13 @@ Ptr<Socket> Network::createConnection(uint32_t nodeId, uint32_t destinationAdres
     remotes.push_back(remote);
 
     return source;
+}
+
+
+void Network::addQueues()
+{
+    std::string sz = "10000";
+    tch.Uninstall(devices);
+    tch.SetRootQueueDisc("ns3::FifoQueueDisc", "MaxSize", StringValue(sz+"p"));
+    qdiscs.Add(tch.Install(devices));
 }

@@ -129,15 +129,33 @@ void SchedulePackets(Ptr<Socket> source, double meanTime, double meanSize, doubl
    Simulator::ScheduleWithContext(source->GetNode()->GetId(), Seconds(startDelay), &GenerateTraffic, source, randomSize, randomTime);
 }
 
+
+  uint32_t globalN = 0; // hehe
+  uint32_t globalSum = 0;
+
+  static void queue(QueueDiscContainer qdiscs)
+  {
+    
+    auto disc = qdiscs.Get(12); 
+    uint32_t currentSum = disc->GetNPackets();
+    globalSum += currentSum;
+    globalN++;
+    
+    //std::cout << currentSum << '\n';
+    
+  }
+
+
 int main (int argc, char *argv[])
 {
   //runPRNGtest();
 
   //RngSeedManager::SetSeed(12);
 
+
   const uint32_t nodeCount = 9;
 
-  const double simTime = 1.0; //Seconds
+  const double simTime = 2.0; //Seconds
   const double startDelay = 1.0; //Seconds
 
   Network network(nodeCount, simTime, startDelay);
@@ -150,6 +168,8 @@ int main (int argc, char *argv[])
   network.addP2PLink("8Mbps", 5, 6);
   network.addP2PLink("10Mbps", 6, 7);
   network.addP2PLink("8Mbps", 6, 8);
+
+  network.addQueues();
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   
@@ -170,8 +190,8 @@ int main (int argc, char *argv[])
 
   Ptr<UdpServer> server = network.addUdpServer(7);
 
-  server->TraceConnectWithoutContext("RxWithAddresses", MakeBoundCallback (&received_msg, routerSource, clientsSource));
 
+  server->TraceConnectWithoutContext("RxWithAddresses", MakeBoundCallback (&received_msg, routerSource, clientsSource));
 
   AnimationInterface anim("network.xml");
   anim.SetConstantPosition(network.nodeContainer.Get(0), -80.0, -20.0);
@@ -191,11 +211,14 @@ int main (int argc, char *argv[])
   SchedulePackets(sourceC, 0.0005, meanPacketSize, startDelay);
   SchedulePackets(sourceD, 0.001, meanPacketSize, startDelay);
 
+
   Ptr<FlowMonitor> flowMonitor;
   FlowMonitorHelper flowmonHelper;
   flowMonitor = flowmonHelper.InstallAll();
 
-  std::cout<<"Network "<<network.interfaces.GetN()<<'\n';
+  for (float t=0; t < simTime; t+=0.00001) {
+		Simulator::Schedule(Seconds(t), &queue, network.qdiscs);
+	}
   
   Simulator::Stop(Seconds (startDelay+simTime));
 
@@ -207,6 +230,8 @@ int main (int argc, char *argv[])
   std::cout << "Total packets: " << totalPackets << "\n";
   std::cout << "Packets / s: " << totalPackets / simTime << "\n";
   std::cout << "Number of packets under 12 byte: " << smallPackets << ", extra added bytes: " << addedBytes << " bytes \n";
+
+  std::cout<<"Average number in queue: "<<globalSum<<"\n"<<globalN<<'\n';
 
   //NS_LOG_INFO ("Create Applications.");
 
