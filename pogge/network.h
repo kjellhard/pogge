@@ -35,6 +35,7 @@ public:
   Ipv4AddressHelper adress;
   NetDeviceContainer devices;
   Ipv4InterfaceContainer interfaces;
+  uint32_t i = 0;
   
   uint16_t port_number = 9;  
   ApplicationContainer server_apps;
@@ -55,4 +56,5 @@ public:
   Ptr<Socket> createConnection(uint32_t nodeId);
 
   Ptr<Socket> createConnection(uint32_t nodeId, uint32_t destinationAdressId);
+
 };

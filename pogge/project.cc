@@ -151,24 +151,27 @@ int main (int argc, char *argv[])
   network.addP2PLink("10Mbps", 6, 7);
   network.addP2PLink("8Mbps", 6, 8);
 
+  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+  
+  Ptr<Socket> sourceA = network.createConnection(0, 13);
+  Ptr<Socket> sourceB = network.createConnection(1, 13);
+  Ptr<Socket> sourceC = network.createConnection(2, 13);
+  Ptr<Socket> sourceD = network.createConnection(3, 13);
+
+  Ptr<Socket> routerSource = network.createConnection(7, 15);
+  Ptr<Socket> clientsSource = network.createConnection(7);
 
   network.addUdpServer(0);
   network.addUdpServer(1);
   network.addUdpServer(2);
   network.addUdpServer(3);
+  network.addUdpServer(8);
 
 
   Ptr<UdpServer> server = network.addUdpServer(7);
 
-  Ptr<Socket> routerSource = network.createConnection(7, 15);
-  Ptr<Socket> clientsSource = network.createConnection(7);
-
   server->TraceConnectWithoutContext("RxWithAddresses", MakeBoundCallback (&received_msg, routerSource, clientsSource));
 
-  Ptr<Socket> sourceA = network.createConnection(0, 13);
-  Ptr<Socket> sourceB = network.createConnection(1, 13);
-  Ptr<Socket> sourceC = network.createConnection(2, 13);
-  Ptr<Socket> sourceD = network.createConnection(3, 13);
 
   AnimationInterface anim("network.xml");
   anim.SetConstantPosition(network.nodeContainer.Get(0), -80.0, -20.0);
@@ -191,6 +194,8 @@ int main (int argc, char *argv[])
   Ptr<FlowMonitor> flowMonitor;
   FlowMonitorHelper flowmonHelper;
   flowMonitor = flowmonHelper.InstallAll();
+
+  std::cout<<"Network "<<network.interfaces.GetN()<<'\n';
   
   Simulator::Stop(Seconds (startDelay+simTime));
 
